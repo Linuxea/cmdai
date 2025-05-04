@@ -13,7 +13,7 @@ parser.add_argument("--q", help="input your question", required=True)
 args = parser.parse_args()
 
 # Initialize the DeepSeek model
-llm = OpenRouter(model="deepseek/deepseek-chat-v3-0324", max_tokens=16000)
+llm = OpenRouter(model="google/gemini-2.5-pro-preview-03-25", max_tokens=16000)
 
 
 # Define a tool to execute bash commands
@@ -26,6 +26,12 @@ def bash_executor(command: str) -> str:
     return result.stdout.strip()
 
 
+# Define a tool to search by natural language
+def search_by_natural_language(query: str) -> str:
+    llm = OpenRouter(model="perplexity/sonar-pro", max_tokens=16000)
+    return llm.complete(query).text
+
+
 # Define a tool to update a file
 def update_file(file_path: str, content: str) -> str:
     """Useful for updating a file with new content."""
@@ -36,7 +42,7 @@ def update_file(file_path: str, content: str) -> str:
 
 # Create the agent
 reagent = ReActAgent(
-    tools=[bash_executor, update_file],
+    tools=[search_by_natural_language, bash_executor, update_file],
     llm=llm,
     max_iterations=100,
     system_prompt="""
